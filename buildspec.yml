@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to ECR...
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 625189191223.dkr.ecr.us-east-1.amazonaws.com
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+
+  build:
+    commands:
+      - docker build -t my-app:$IMAGE_TAG .
+      - docker tag my-app:$IMAGE_TAG 625189191223.dkr.ecr.us-east-1.amazonaws.com/my-app:$IMAGE_TAG
+      - docker tag my-app:$IMAGE_TAG 625189191223.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
+
+  post_build:
+    commands:
+      - docker push 625189191223.dkr.ecr.us-east-1.amazonaws.com/my-app:$IMAGE_TAG
+      - docker push 625189191223.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
+      - printf '[{"name":"my-app","imageUri":"%s"}]' 625189191223.dkr.ecr.us-east-1.amazonaws.com/my-app:$IMAGE_TAG > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
