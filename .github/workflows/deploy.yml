@@ -56,8 +56,8 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
+          kubectl apply -f deployment.yaml
+          kubectl apply -f service.yaml
           kubectl set image deployment/my-app \
             my-app=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           kubectl rollout status deployment/my-app
