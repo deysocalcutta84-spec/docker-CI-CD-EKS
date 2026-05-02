@@ -40,10 +40,10 @@ jobs:
                      $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      # ✅ NEW STEP - Install kubectl on the runner
       - name: Install kubectl
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s \
+            https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
@@ -62,4 +62,5 @@ jobs:
           kubectl apply -f service.yml
           kubectl set image deployment/my-app \
             my-app=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          kubectl rollout status deployment/my-app
+          # ✅ Added timeout - gives pods 5 mins to come up
+          kubectl rollout status deployment/my-app --timeout=5m
